@@ -21,8 +21,7 @@ fn main() {
     let num_words: usize = get_num_words(args.num_words);
     let delimiter: String = args.delimiter;
 
-    let passphrase = passphrase::get_passphrase(num_words, delimiter);
-    println!("{}", passphrase)
+    passphrase::print_passphrases(num_words, delimiter);
 }
 
 // Return the number of words to use in the passphrase as an integer. Throw an error if the number is outside the range of MIN_WORDS to MAX_WORDS (inclusive)
