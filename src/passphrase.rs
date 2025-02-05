@@ -5,8 +5,14 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 use rand::Rng;
+use config::{Config};
+use serde::Deserialize;
 
-static RANDOMIZED_VEC_SIZE: usize = 20_000_000;
+#[derive(Debug, Deserialize)]
+struct Config {
+    random_vec_size: usize,
+    words_txt_filepath: String
+}
 
 pub fn get_passphrase(num_words: usize, delimiter: String) -> String {
     
@@ -14,7 +20,21 @@ pub fn get_passphrase(num_words: usize, delimiter: String) -> String {
     // get a randomized vector
     // generate the passphrase
 
+    let config = load_configurations();
+    let filepath = &config.words_txt_filepath;
+    let words = words_to_hashmap(filepath);
+    let randomized_vec = randomized_vector(config.random_vec_size);
+
     let placeholder = String::from("Placeholder string to stop the compiler from throwing an err right now.");
+}
+
+fn load_configurations() -> Config {
+    let config = Config::default();
+    config
+        .merge(File::with_name("config"))
+        .unwrap()
+        .try_into()
+        .unwrap()
 }
 
 fn words_to_hashmap(file_path: &str) -> io::Result<HashMap<usize, String>> {
@@ -61,7 +81,7 @@ fn randomized_vector(range: usize) -> Vec<usize> {
         if which_rand == 0 {
             continue;
         } else if which_rand == 1 {
-            random_ints[index] = random_ints[index];
+            random_ints[index] = random_ints2[index];
         } else if which_rand == 2 {
             random_ints[index] = rand::thread_rng().gen_range(0..range);
         }

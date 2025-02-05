@@ -1,0 +1,4 @@
+{
+    "random_vec_size": 20000000,
+    "words_txt_filepath": "./words/words.txt"
+}
