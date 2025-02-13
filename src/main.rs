@@ -2,14 +2,14 @@
 mod passphrase;
 use clap::Parser;
 
-static MIN_WORDS: usize = 6;
-static MAX_WORDS: usize = 64;
+static MIN_WORDS: usize = 12;
+static MAX_WORDS: usize = 24;
 
 // A simple program
 #[derive(Parser)]
-#[command(about="\n\nGenerate a passphrase. Dictionary is 9,200 words. Not compliant with any crypto standard. Default delimiter between words is a space to make it easier to type on a phone.")]
+#[command(about="\n\nGenerate a passphrase. Dictionary is ~9,200 words. Not compliant with any crypto standard, cannot be used to generate wallet seed phrases. Default delimiter between words is a space to make it easier to type on a phone.")]
 struct Cli {
-    #[arg(short, long, default_value = "10")]
+    #[arg(short, long, default_value_t = MIN_WORDS.to_string())]
     num_words: String,
 
     #[arg(short, long, default_value = " ")]
@@ -30,7 +30,7 @@ fn get_num_words(num_words: String) -> usize {
     let length: usize = num_words.parse::<usize>().unwrap_or_else(|_| panic!("Error: Please enter a positive, reasonably-sized number"));
 
     if length < MIN_WORDS || length > MAX_WORDS {
-        panic!("Error: Please enter a number between {} and {}", MIN_WORDS, MAX_WORDS);
+        panic!("\nError: Passphrase length (number of words) must be between {} and {}\n", MIN_WORDS, MAX_WORDS);
     };
 
     length

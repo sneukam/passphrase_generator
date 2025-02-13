@@ -50,34 +50,31 @@ fn words_to_hashmap(file_path: &str) -> io::Result<HashMap<u16, String>> {
 fn randomized_vector(randomized_vec_size: usize, word_range: usize) -> Vec<u16> {
 
     let mut random_ints: Vec<u16> = Vec::<u16>::new();
-
-    for _i in 0..randomized_vec_size {
-        let rand_num = rand::thread_rng().gen_range(0..word_range) as u16;
-        random_ints.push(rand_num);
-    }
-
     let mut random_ints2: Vec<u16> = Vec::<u16>::new();
 
+    // linearly fill with random numbers
     for _i in 0..randomized_vec_size {
         let rand_num = rand::thread_rng().gen_range(0..word_range) as u16;
-        random_ints2.push(rand_num);
+        let rand_num2 = rand::thread_rng().gen_range(0..word_range) as u16;
+
+        random_ints.push(rand_num);
+        random_ints2.push(rand_num2);
     }
 
+    // place random numbers at random indices
     for _i in 0..randomized_vec_size {
+        let rand_index = rand::thread_rng().gen_range(0..randomized_vec_size);
+        let rand_index2 = rand::thread_rng().gen_range(0..randomized_vec_size);
 
-        let index = rand::thread_rng().gen_range(0..randomized_vec_size);
-        let which_rand = rand::thread_rng().gen_range(0..3) as u8;
-        
-        if which_rand == 0 {
-            continue;
-        } else if which_rand == 1 {
-            random_ints[index] = random_ints2[index];
-        } else if which_rand == 2 {
-            random_ints[index] = rand::thread_rng().gen_range(0..word_range) as u16;
-        }
+        random_ints[rand_index] = rand::thread_rng().gen_range(0..word_range) as u16;
+        random_ints2[rand_index2] = rand::thread_rng().gen_range(0..word_range) as u16;
     }
 
-    random_ints
+    // randomly select a vector to return
+    if rand::thread_rng().gen::<bool>() as usize == 1 {
+        return random_ints;
+    }
+    random_ints2
 }
 
 fn passphrase_entropy(passphrase_length: usize, word_dictionary_size: usize) -> usize {
@@ -99,16 +96,35 @@ fn generate_passphrase(words: HashMap<u16, String>, randomized_vec: Vec<u16>, pa
     let mut words_generated: usize = 0;
     let mut passphrase: String = String::new();
 
+    // build the passphrase
     while words_generated < passphrase_length {
 
+        // either of vec_index or vec_index 2 will be used to select the position in randomized_vec where the next word is pulled from
         let vec_index= rand::thread_rng().gen_range(0..vec_size);
-        let chance = rand::thread_rng().gen_range(0..10) as usize;
-        let y_n = rand::thread_rng().gen_range(0..10) as usize;
+        let vec_index2 = rand::thread_rng().gen_range(0..vec_size);
+        let chance1 = rand::thread_rng().gen_range(0..10) as usize;
+        let chance2 = rand::thread_rng().gen_range(0..10) as usize;
 
-        if chance == y_n {
-            let word_index = randomized_vec[vec_index];
-            passphrase += &words[&word_index];
+        // Not ever loop iteration will add a word to the passphprase. 
+        // vec_index and vec_index2 are intentionally created each loop before a word is potentially added.
+        // This buffers against linear random generation, increasing complexity.
+        if chance1 == chance2 {
+
+            let rand_word_index = randomized_vec[vec_index];
+            let rand_word_index2 = randomized_vec[vec_index2];
+            let choice: u8 = rand::thread_rng().gen::<bool>() as u8;
+
+            // Assign the value based on the random choice
+            let word_index = match choice {
+                0 => rand_word_index,
+                1 => rand_word_index2,
+                _ => unreachable!(), // This branch is unreachable since we know choice is either 0 or 1
+            };
+            
+            passphrase += &words[&word_index];  // add the word to the passphrase
             words_generated += 1;
+
+            // add a delimiter to the passphrase if there are still more words to add.
             if words_generated < passphrase_length {
                 passphrase += &delimiter;
             }
