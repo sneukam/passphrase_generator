@@ -3,7 +3,7 @@ mod passphrase;
 use clap::Parser;
 
 static MIN_WORDS: usize = 12;
-static MAX_WORDS: usize = 24;
+static MAX_WORDS: usize = 32;
 
 // A simple program
 #[derive(Parser)]
